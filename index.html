@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Minesweeper</title>
+    <link rel="stylesheet" type="text/css"  href="css/reset.css">
+    <link rel="stylesheet" type="text/css"  href="css/styles.css">
+</head>
+<body>
+
+    <header class="header">
+        <h1 class="header__title">MineSweeper</h1>
+        <h2 class="header__subtitle">My First JS-App</h2>
+    </header>
+
+    <section class="section">
+        <section class="controls">
+            <div class="controls__default">
+                <button class="controls__btn j-btn" data-level="easy">Easy</button>
+                <button class="controls__btn j-btn" data-level="medium">Medium</button>
+                <button class="controls__btn j-btn" data-level="hard">Hard</button>
+            </div>
+            <div class="controls__custom">
+                <div class="controls__custom-cell">
+                    <label class="controls__label">Width:</label>
+                    <input type="text" name="fieldWidth" class="controls__input"/>
+                    <div class="controls__hint">The minimum value should be 8.<br>The maximum value should be 40.</div>
+                </div>
+                <div class="controls__custom-cell">
+                    <label class="controls__label">Height:</label>
+                    <input type="text" name="fieldHeight" class="controls__input"/>
+                    <div class="controls__hint">The minimum value should be 8.<br>The maximum value should be 40.</div>
+                </div>
+                <div class="controls__custom-cell">
+                    <label class="controls__label">Bombs:</label>
+                    <input type="text" name="bombs" class="controls__input"/>
+                    <div class="controls__hint">The minimum value should be 10% from field.<br>The maximum value should be 30% from field.<br></div>
+                </div>
+                <div class="controls__custom-cell">
+                    <button class="controls__submit j-btn" data-custom="true">Start</button>
+                </div>
+            </div>
+        </section>
+
+        <sections class="field" id="field"></sections>
+
+    </section>
+
+
+<!--<script src="js/main.js"></script>-->
+<script src="js/game.js"></script>
+</body>
+</html>
