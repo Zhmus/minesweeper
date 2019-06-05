@@ -192,3 +192,17 @@ for (var i = 0; i < fieldHeight; i++) {
     }
 }
 
+
+for (let key in fieldCells) {
+    if (!fieldCells[key].count && !fieldCells[key].isBomb) {
+        for (let item in fieldCells[key].nearEmptyCells) {
+            let currentCell = fieldCells[key].nearEmptyCells[item];
+
+            Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells, fieldCells[key].nearEmptyCells);
+            fieldCells[key].nearEmptyCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells;
+
+            Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells, fieldCells[key].nearCountCells);
+            fieldCells[key].nearCountCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells;
+        }
+    }
+}
