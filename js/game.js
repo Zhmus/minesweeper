@@ -242,12 +242,16 @@ let MineSweeper = (function () {
             if (currentBtn.dataset.custom) {
                 fieldWidth = Math.round(!+inputWidth.value || +inputWidth.value <= minValue ? minValue : (+inputWidth.value > maxValue ? maxValue : +inputWidth.value));
                 fieldHeight = Math.round(!+inputHeight.value || +inputHeight.value <= minValue ? minValue : (+inputHeight.value > maxValue ? maxValue : +inputHeight.value));
-                bombNumber = Math.round(+inputBombs.value || fieldWidth * fieldHeight * 0.1);
 
-                if(bombNumber > Math.round(fieldWidth * fieldHeight * 0.3)) {
-                    bombNumber = Math.round(fieldWidth * fieldHeight * 0.3)
-                } else if (bombNumber < Math.round(fieldWidth * fieldHeight * 0.1)) {
-                    bombNumber = fieldWidth * fieldHeight * 0.1
+                let minBombsValue = Math.round(fieldWidth * fieldHeight * 0.1);
+                let maxBombsValue = Math.round(fieldWidth * fieldHeight * 0.3);
+
+                bombNumber = Math.round(+inputBombs.value) || minBombsValue;
+
+                if(bombNumber > maxBombsValue) {
+                    bombNumber = maxBombsValue;
+                } else if (minBombsValue) {
+                    bombNumber = minBombsValue;
                 }
 
             } else {
