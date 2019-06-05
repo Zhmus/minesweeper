@@ -16,17 +16,17 @@ class GameField {
         const defaultBtn = document.getElementsByClassName('j-btn');
 
         Array.from(defaultBtn).forEach((element) => {
-            element.addEventListener('click', _self.createGameField);
+            element.addEventListener('click', _self.getGameParams);
         });
 
     }
 
-    createGameField() {
+    getGameParams() {
         let fieldWidth, fieldHeight, bombNumber;
         const minValue = 8;
         const maxValue = 30;
         const currentBtn = this;
-        const inputWidth = document.getElementsByName('fieldWidth')[0];
+        const inputWidth = document.getElementsByName( 'fieldWidth')[0];
         const inputHeight = document.getElementsByName('fieldHeight')[0];
         const inputBombs = document.getElementsByName('bombs')[0];
         const fieldContainer = document.getElementById('field');
@@ -78,6 +78,10 @@ class GameField {
         inputHeight.value = fieldHeight;
         inputBombs.value = bombNumber;
 
+        this.renderGameField();
+    }
+
+    renderGameField() {
         fieldContainer.innerHTML = '';
         fieldContainer.classList.remove('is-small');
 
@@ -136,99 +140,104 @@ class GameField {
         _self.fieldCells = {};
         let indexBombs = [];
 
-        (() => {
-            for (let i = 0; i < fieldHeight; i++) {
-                for (let j = 0; j < fieldWidth; j++) {
-                    indexBombs.push({x: i, y: j});
-                    _self.fieldCells[`x: ${i}, y: ${j}`] = {
-                        x: i,
-                        y: j,
-                        isBomb: false,
-                        isChecked: false,
-                        count: null,
-                        isFlag: false,
-                    }
-                }
-            }
-        })();
-
-        (() => {
-            indexBombs = indexBombs.filter((cell) => {
-                return JSON.stringify(cell) !== JSON.stringify(firstCell);
-            });
-
-            const compareRandom = () => {
-                return Math.random() - 0.5;
-            }
-
-            indexBombs.sort(compareRandom).splice(_self.bombNumber);
-
-            indexBombs.forEach((cell) => {
-                _self.fieldCells[`x: ${cell.x}, y: ${cell.y}`].isBomb = true;
-            });
-        })();
-
-        (() => {
-            let currentCell;
-            indexBombs.forEach((cell) => {
-                for (let i = cell.x - 1; i <= cell.x + 1; i++) {
-                    for (let j = cell.y - 1; j <= cell.y + 1; j++) {
-                        currentCell = _self.fieldCells[`x: ${i}, y: ${j}`];
-                        if (currentCell) {
-                            if (!currentCell.isBomb) {
-                                currentCell.count = currentCell.count || 0;
-                                currentCell.count++;
-                            }
-                        }
-                    }
-                }
-            });
-        })();
-
-        (() => {
-            const fieldCells = _self.fieldCells;
-            for (let key in fieldCells) {
-                if (!fieldCells[key].count && !fieldCells[key].isBomb) {
-
-                    fieldCells[key].nearEmptyCells = {};
-                    fieldCells[key].nearCountCells = {};
-
-                    for (let i = fieldCells[key].x - 1; i <= fieldCells[key].x + 1; i++) {
-                        for (let j = fieldCells[key].y - 1; j <= fieldCells[key].y + 1; j++) {
-                            if (fieldCells[`x: ${i}, y: ${j}`] && !fieldCells[`x: ${i}, y: ${j}`].isBomb) {
-                                if (!fieldCells[`x: ${i}, y: ${j}`].count) {
-                                    fieldCells[key].nearEmptyCells[`x: ${i}, y: ${j}`] = {
-                                        x: i,
-                                        y: j
-                                    };
-                                } else {
-                                    fieldCells[key].nearCountCells[`x: ${i}, y: ${j}`] = {
-                                        x: i,
-                                        y: j
-                                    };
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            for (let key in fieldCells) {
-                if (!fieldCells[key].count && !fieldCells[key].isBomb) {
-                    for (let item in fieldCells[key].nearEmptyCells) {
-                        const currentCell = fieldCells[key].nearEmptyCells[item];
-
-                        Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells, fieldCells[key].nearEmptyCells);
-                        fieldCells[key].nearEmptyCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells;
-
-                        Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells, fieldCells[key].nearCountCells);
-                        fieldCells[key].nearCountCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells;
-                    }
-                }
-            }
-        })();
+        _self.setIndexCells();
+        _self.setIndexBombs();
+        _self.setActiveCells();
+        _self.setEmptyCells();
 
         _self.checkCell(firstCell, firstElement);
+    }
+
+    setIndexCells () {
+        for (let i = 0; i < fieldHeight; i++) {
+            for (let j = 0; j < fieldWidth; j++) {
+                indexBombs.push({x: i, y: j});
+                _self.fieldCells[`x: ${i}, y: ${j}`] = {
+                    x: i,
+                    y: j,
+                    isBomb: false,
+                    isChecked: false,
+                    count: null,
+                    isFlag: false,
+                }
+            }
+        }
+    }
+
+    setIndexBombs () {
+        indexBombs = indexBombs.filter((cell) => {
+            return JSON.stringify(cell) !== JSON.stringify(firstCell);
+        });
+
+        const compareRandom = () => {
+            return Math.random() - 0.5;
+        }
+
+        indexBombs.sort(compareRandom).splice(_self.bombNumber);
+
+        indexBombs.forEach((cell) => {
+            _self.fieldCells[`x: ${cell.x}, y: ${cell.y}`].isBomb = true;
+        });
+    }
+
+    setActiveCells () {
+        let currentCell;
+        indexBombs.forEach((cell) => {
+            for (let i = cell.x - 1; i <= cell.x + 1; i++) {
+                for (let j = cell.y - 1; j <= cell.y + 1; j++) {
+                    currentCell = _self.fieldCells[`x: ${i}, y: ${j}`];
+                    if (currentCell) {
+                        if (!currentCell.isBomb) {
+                            currentCell.count = currentCell.count || 0;
+                            currentCell.count++;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    setEmptyCells () {
+        const fieldCells = _self.fieldCells;
+        for (let key in fieldCells) {
+            if (!fieldCells[key].count && !fieldCells[key].isBomb) {
+
+                fieldCells[key].nearEmptyCells = {};
+                fieldCells[key].nearCountCells = {};
+
+                for (let i = fieldCells[key].x - 1; i <= fieldCells[key].x + 1; i++) {
+                    for (let j = fieldCells[key].y - 1; j <= fieldCells[key].y + 1; j++) {
+                        if (fieldCells[`x: ${i}, y: ${j}`] && !fieldCells[`x: ${i}, y: ${j}`].isBomb) {
+                            if (!fieldCells[`x: ${i}, y: ${j}`].count) {
+                                fieldCells[key].nearEmptyCells[`x: ${i}, y: ${j}`] = {
+                                    x: i,
+                                    y: j
+                                };
+                            } else {
+                                fieldCells[key].nearCountCells[`x: ${i}, y: ${j}`] = {
+                                    x: i,
+                                    y: j
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (let key in fieldCells) {
+            if (!fieldCells[key].count && !fieldCells[key].isBomb) {
+                for (let item in fieldCells[key].nearEmptyCells) {
+                    const currentCell = fieldCells[key].nearEmptyCells[item];
+
+                    Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells, fieldCells[key].nearEmptyCells);
+                    fieldCells[key].nearEmptyCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells;
+
+                    Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells, fieldCells[key].nearCountCells);
+                    fieldCells[key].nearCountCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells;
+                }
+            }
+        }
     }
 
     checkCell(currentCell, currentElement) {
