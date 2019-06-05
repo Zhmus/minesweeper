@@ -20,7 +20,7 @@ class GameField {
         const minValue = 8;
         const maxValue = 30;
         const currentBtn = evt.target;
-        const inputWidth = document.getElementsByName( 'fieldWidth')[0];
+        const inputWidth = document.getElementsByName('fieldWidth')[0];
         const inputHeight = document.getElementsByName('fieldHeight')[0];
         const inputBombs = document.getElementsByName('bombs')[0];
 
@@ -130,8 +130,6 @@ class GameField {
         this.game.unCheckedCells = this.game.fieldHeight * this.game.fieldWidth;
         this.game.fieldCells = {};
 
-        console.dir(this);
-
         this.setIndexCells();
         this.setIndexBombs(firstCell);
         this.setActiveCells();
@@ -140,7 +138,7 @@ class GameField {
         this.checkCell(firstCell, firstElement);
     }
 
-    static setIndexCells () {
+    static setIndexCells() {
         this.game.indexBombs = [];
         for (let i = 0; i < this.game.fieldHeight; i++) {
             for (let j = 0; j < this.game.fieldWidth; j++) {
@@ -157,7 +155,7 @@ class GameField {
         }
     }
 
-    static setIndexBombs (firstCell) {
+    static setIndexBombs(firstCell) {
         this.game.indexBombs = this.game.indexBombs.filter((cell) => {
             return JSON.stringify(cell) !== JSON.stringify(firstCell);
         });
@@ -173,7 +171,7 @@ class GameField {
         });
     }
 
-    static setActiveCells () {
+    static setActiveCells() {
         let currentCell;
         this.game.indexBombs.forEach((cell) => {
             for (let i = cell.x - 1; i <= cell.x + 1; i++) {
@@ -190,7 +188,7 @@ class GameField {
         });
     }
 
-    static setEmptyCells () {
+    static setEmptyCells() {
         for (let key in this.game.fieldCells) {
             if (!this.game.fieldCells[key].count && !this.game.fieldCells[key].isBomb) {
 
@@ -314,4 +312,3 @@ class GameField {
 }
 
 GameField.init();
-
