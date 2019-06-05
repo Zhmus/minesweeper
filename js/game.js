@@ -231,6 +231,8 @@ let MineSweeper = (function () {
         },
         createGameField: function () {
             let fieldWidth, fieldHeight, bombNumber;
+            const minValue = 8;
+            const maxValue = 30;
             const currentBtn = this;
             const inputWidth = document.getElementsByName('fieldWidth')[0];
             const inputHeight = document.getElementsByName('fieldHeight')[0];
@@ -238,8 +240,8 @@ let MineSweeper = (function () {
             const fieldContainer = document.getElementById('field');
 
             if (currentBtn.dataset.custom) {
-                fieldWidth = Math.round(!+inputWidth.value || +inputWidth.value <= 8 ? 8 : (+inputWidth.value > 40 ? 40 : +inputWidth.value));
-                fieldHeight = Math.round(!+inputHeight.value || +inputHeight.value <= 8 ? 8 : (+inputHeight.value > 40 ? 40 : +inputHeight.value));
+                fieldWidth = Math.round(!+inputWidth.value || +inputWidth.value <= minValue ? minValue : (+inputWidth.value > maxValue ? maxValue : +inputWidth.value));
+                fieldHeight = Math.round(!+inputHeight.value || +inputHeight.value <= minValue ? minValue : (+inputHeight.value > maxValue ? maxValue : +inputHeight.value));
                 bombNumber = Math.round(+inputBombs.value || fieldWidth * fieldHeight * 0.1);
 
                 if(bombNumber > Math.round(fieldWidth * fieldHeight * 0.3)) {
