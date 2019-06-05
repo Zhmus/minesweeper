@@ -244,7 +244,7 @@ let MineSweeper = (function () {
             let inputBombsValue = Math.round(+inputBombs.value);
 
             if (currentBtn.dataset.custom) {
-                fieldWidth = !inputWidthValue || inputWidthValue <= minValue ? minValue : (+inputWidthValue > maxValue ? maxValue : inputWidthValue);
+                fieldWidth = !inputWidthValue || inputWidthValue <= minValue ? minValue : (inputWidthValue > maxValue ? maxValue : inputWidthValue);
                 fieldHeight = !inputHeightValue || inputHeightValue <= minValue ? minValue : (inputHeightValue > maxValue ? maxValue :inputHeightValue);
 
                 let minBombsValue = Math.round(fieldWidth * fieldHeight * 0.1);
