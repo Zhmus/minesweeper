@@ -11,25 +11,18 @@ class GameField {
     }
 
     static init() {
-        const _self = this;
-
         const defaultBtn = document.getElementsByClassName('j-btn');
-
-        Array.from(defaultBtn).forEach((element) => {
-            element.addEventListener('click', _self.getGameParams);
-        });
-
+        Array.from(defaultBtn).forEach((element) => element.addEventListener('click', evt => this.getGameParams(evt)));
     }
 
-    getGameParams() {
+    static getGameParams(evt) {
         let fieldWidth, fieldHeight, bombNumber;
         const minValue = 8;
         const maxValue = 30;
-        const currentBtn = this;
+        const currentBtn = evt.target;
         const inputWidth = document.getElementsByName( 'fieldWidth')[0];
         const inputHeight = document.getElementsByName('fieldHeight')[0];
         const inputBombs = document.getElementsByName('bombs')[0];
-        const fieldContainer = document.getElementById('field');
 
         const inputWidthValue = Math.round(+inputWidth.value);
         const inputHeightValue = Math.round(+inputHeight.value);
@@ -78,10 +71,12 @@ class GameField {
         inputHeight.value = fieldHeight;
         inputBombs.value = bombNumber;
 
-        this.renderGameField();
+        this.renderGameField(fieldWidth, fieldHeight, bombNumber);
     }
 
-    renderGameField() {
+    static renderGameField(fieldWidth, fieldHeight, bombNumber) {
+        const fieldContainer = document.getElementById('field');
+
         fieldContainer.innerHTML = '';
         fieldContainer.classList.remove('is-small');
 
@@ -101,58 +96,56 @@ class GameField {
                 fieldCellContainer.setAttribute('id', `${i}-${j}`);
                 fieldRowContainer.appendChild(fieldCellContainer);
 
-                fieldCellContainer.addEventListener('click', () => {
-                    this.bindClick.call(this, game);
+                fieldCellContainer.addEventListener('click', evt => this.bindClick(evt));
+                fieldCellContainer.addEventListener('contextmenu', evt => {
+                    this.bindRightClick(evt);
+                    evt.preventDefault();
                 });
-                fieldCellContainer.addEventListener('contextmenu',(e) => {
-                    e.preventDefault();
-                    this.bindRightClick.call(this, game);
-                    return false;
-                }, false);
             }
         }
     }
 
-    bindClick(...self) {
-        const _self = self[0];
-        const currentCell = {x: +this.id.split('-')[0], y: +this.id.split('-')[1]};
+    static bindClick(evt) {
+        const currentBtn = evt.target;
+        const currentCell = {x: +currentBtn.id.split('-')[0], y: +currentBtn.id.split('-')[1]};
 
-        if (!_self.endGame) {
-            if (!_self.fieldCells) return _self.createField(currentCell, this);
-            _self.checkCell(currentCell, this);
+        if (!this.endGame) {
+            !this.game.fieldCells
+                ? this.createField(currentCell, currentBtn)
+                : this.checkCell(currentCell, currentBtn);
         }
     }
 
-    bindRightClick(...self) {
-        const _self = self[0];
-        const currentCell = {x: +this.id.split('-')[0], y: +this.id.split('-')[1]};
-        if (!_self.endGame) {
-            if (!_self.fieldCells) return _self.createField(currentCell, this);
-            _self.addFlag(currentCell, this);
+    static bindRightClick(evt) {
+        const currentBtn = evt.target;
+        const currentCell = {x: +currentBtn.id.split('-')[0], y: +currentBtn.id.split('-')[1]};
+        if (!this.endGame) {
+            !this.game.fieldCells
+                ? this.createField(currentCell, currentBtn)
+                : this.addFlag(currentCell, currentBtn);
         }
     }
 
-    createField(firstCell, firstElement) {
-        const _self = this;
-        const fieldHeight = _self.fieldHeight;
-        const fieldWidth = _self.fieldWidth;
-        _self.unCheckedCells = fieldHeight * fieldWidth;
-        _self.fieldCells = {};
-        let indexBombs = [];
+    static createField(firstCell, firstElement) {
+        this.game.unCheckedCells = this.game.fieldHeight * this.game.fieldWidth;
+        this.game.fieldCells = {};
 
-        _self.setIndexCells();
-        _self.setIndexBombs();
-        _self.setActiveCells();
-        _self.setEmptyCells();
+        console.dir(this);
 
-        _self.checkCell(firstCell, firstElement);
+        this.setIndexCells();
+        this.setIndexBombs(firstCell);
+        this.setActiveCells();
+        this.setEmptyCells();
+
+        this.checkCell(firstCell, firstElement);
     }
 
-    setIndexCells () {
-        for (let i = 0; i < fieldHeight; i++) {
-            for (let j = 0; j < fieldWidth; j++) {
-                indexBombs.push({x: i, y: j});
-                _self.fieldCells[`x: ${i}, y: ${j}`] = {
+    static setIndexCells () {
+        this.game.indexBombs = [];
+        for (let i = 0; i < this.game.fieldHeight; i++) {
+            for (let j = 0; j < this.game.fieldWidth; j++) {
+                this.game.indexBombs.push({x: i, y: j});
+                this.game.fieldCells[`x: ${i}, y: ${j}`] = {
                     x: i,
                     y: j,
                     isBomb: false,
@@ -164,8 +157,8 @@ class GameField {
         }
     }
 
-    setIndexBombs () {
-        indexBombs = indexBombs.filter((cell) => {
+    static setIndexBombs (firstCell) {
+        this.game.indexBombs = this.game.indexBombs.filter((cell) => {
             return JSON.stringify(cell) !== JSON.stringify(firstCell);
         });
 
@@ -173,19 +166,19 @@ class GameField {
             return Math.random() - 0.5;
         }
 
-        indexBombs.sort(compareRandom).splice(_self.bombNumber);
+        this.game.indexBombs.sort(compareRandom).splice(this.game.bombNumber);
 
-        indexBombs.forEach((cell) => {
-            _self.fieldCells[`x: ${cell.x}, y: ${cell.y}`].isBomb = true;
+        this.game.indexBombs.forEach((cell) => {
+            this.game.fieldCells[`x: ${cell.x}, y: ${cell.y}`].isBomb = true;
         });
     }
 
-    setActiveCells () {
+    static setActiveCells () {
         let currentCell;
-        indexBombs.forEach((cell) => {
+        this.game.indexBombs.forEach((cell) => {
             for (let i = cell.x - 1; i <= cell.x + 1; i++) {
                 for (let j = cell.y - 1; j <= cell.y + 1; j++) {
-                    currentCell = _self.fieldCells[`x: ${i}, y: ${j}`];
+                    currentCell = this.game.fieldCells[`x: ${i}, y: ${j}`];
                     if (currentCell) {
                         if (!currentCell.isBomb) {
                             currentCell.count = currentCell.count || 0;
@@ -197,24 +190,23 @@ class GameField {
         });
     }
 
-    setEmptyCells () {
-        const fieldCells = _self.fieldCells;
-        for (let key in fieldCells) {
-            if (!fieldCells[key].count && !fieldCells[key].isBomb) {
+    static setEmptyCells () {
+        for (let key in this.game.fieldCells) {
+            if (!this.game.fieldCells[key].count && !this.game.fieldCells[key].isBomb) {
 
-                fieldCells[key].nearEmptyCells = {};
-                fieldCells[key].nearCountCells = {};
+                this.game.fieldCells[key].nearEmptyCells = {};
+                this.game.fieldCells[key].nearCountCells = {};
 
-                for (let i = fieldCells[key].x - 1; i <= fieldCells[key].x + 1; i++) {
-                    for (let j = fieldCells[key].y - 1; j <= fieldCells[key].y + 1; j++) {
-                        if (fieldCells[`x: ${i}, y: ${j}`] && !fieldCells[`x: ${i}, y: ${j}`].isBomb) {
-                            if (!fieldCells[`x: ${i}, y: ${j}`].count) {
-                                fieldCells[key].nearEmptyCells[`x: ${i}, y: ${j}`] = {
+                for (let i = this.game.fieldCells[key].x - 1; i <= this.game.fieldCells[key].x + 1; i++) {
+                    for (let j = this.game.fieldCells[key].y - 1; j <= this.game.fieldCells[key].y + 1; j++) {
+                        if (this.game.fieldCells[`x: ${i}, y: ${j}`] && !this.game.fieldCells[`x: ${i}, y: ${j}`].isBomb) {
+                            if (!this.game.fieldCells[`x: ${i}, y: ${j}`].count) {
+                                this.game.fieldCells[key].nearEmptyCells[`x: ${i}, y: ${j}`] = {
                                     x: i,
                                     y: j
                                 };
                             } else {
-                                fieldCells[key].nearCountCells[`x: ${i}, y: ${j}`] = {
+                                this.game.fieldCells[key].nearCountCells[`x: ${i}, y: ${j}`] = {
                                     x: i,
                                     y: j
                                 };
@@ -225,55 +217,54 @@ class GameField {
             }
         }
 
-        for (let key in fieldCells) {
-            if (!fieldCells[key].count && !fieldCells[key].isBomb) {
-                for (let item in fieldCells[key].nearEmptyCells) {
-                    const currentCell = fieldCells[key].nearEmptyCells[item];
+        for (let key in this.game.fieldCells) {
+            if (!this.game.fieldCells[key].count && !this.game.fieldCells[key].isBomb) {
+                for (let item in this.game.fieldCells[key].nearEmptyCells) {
+                    const currentCell = this.game.fieldCells[key].nearEmptyCells[item];
 
-                    Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells, fieldCells[key].nearEmptyCells);
-                    fieldCells[key].nearEmptyCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells;
+                    Object.assign(this.game.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells, this.game.fieldCells[key].nearEmptyCells);
+                    this.game.fieldCells[key].nearEmptyCells = this.game.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearEmptyCells;
 
-                    Object.assign(fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells, fieldCells[key].nearCountCells);
-                    fieldCells[key].nearCountCells = fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells;
+                    Object.assign(this.game.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells, this.game.fieldCells[key].nearCountCells);
+                    this.game.fieldCells[key].nearCountCells = this.game.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`].nearCountCells;
                 }
             }
         }
     }
 
-    checkCell(currentCell, currentElement) {
-        const _self = this;
-        const _currentCell = _self.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`];
+    static checkCell(currentCell, currentElement) {
+        const currentCellParams = this.game.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`];
 
-        if (!_currentCell.isFlag) {
-            if (_currentCell.isBomb) {
-                _self.finishGame(false);
+        if (!currentCellParams.isFlag) {
+            if (currentCellParams.isBomb) {
+                this.finishGame(false);
             } else {
                 if (!currentElement.isChecked) {
                     currentElement.classList.add('is-safe');
-                    if (_currentCell.count) {
-                        currentElement.innerHTML = _currentCell.count;
-                        _currentCell.isChecked = true;
-                        _self.unCheckedCells--;
+                    if (currentCellParams.count) {
+                        currentElement.innerHTML = currentCellParams.count;
+                        currentCellParams.isChecked = true;
+                        this.game.unCheckedCells--;
                     } else {
-                        _currentCell.isChecked = true;
+                        currentCellParams.isChecked = true;
 
-                        for (let key in _currentCell.nearEmptyCells) {
-                            const nearEmptyCell = _self.fieldCells[`x: ${_currentCell.nearEmptyCells[key].x}, y: ${_currentCell.nearEmptyCells[key].y}`];
-                            const nearEmptyElement = document.getElementById(`${_currentCell.nearEmptyCells[key].x}-${_currentCell.nearEmptyCells[key].y}`);
+                        for (let key in currentCellParams.nearEmptyCells) {
+                            const nearEmptyCell = this.game.fieldCells[`x: ${currentCellParams.nearEmptyCells[key].x}, y: ${currentCellParams.nearEmptyCells[key].y}`];
+                            const nearEmptyElement = document.getElementById(`${currentCellParams.nearEmptyCells[key].x}-${currentCellParams.nearEmptyCells[key].y}`);
                             nearEmptyCell.isChecked = true;
                             nearEmptyCell.isFlag = false;
-                            _self.unCheckedCells--;
+                            this.game.unCheckedCells--;
                             nearEmptyElement.classList.remove('is-flag');
                             nearEmptyElement.classList.add('is-safe');
                         }
 
-                        for (let key in _currentCell.nearCountCells) {
-                            const nearCountCell = _self.fieldCells[`x: ${_currentCell.nearCountCells[key].x}, y: ${_currentCell.nearCountCells[key].y}`];
-                            const nearCountElement = document.getElementById(`${_currentCell.nearCountCells[key].x}-${_currentCell.nearCountCells[key].y}`);
+                        for (let key in currentCellParams.nearCountCells) {
+                            const nearCountCell = this.game.fieldCells[`x: ${currentCellParams.nearCountCells[key].x}, y: ${currentCellParams.nearCountCells[key].y}`];
+                            const nearCountElement = document.getElementById(`${currentCellParams.nearCountCells[key].x}-${currentCellParams.nearCountCells[key].y}`);
                             if (!nearCountCell.isChecked) {
                                 nearCountCell.isChecked = true;
                                 nearCountCell.isFlag = false;
-                                _self.unCheckedCells--;
+                                this.game.unCheckedCells--;
                             }
                             nearCountElement.classList.remove('is-flag');
                             nearCountElement.classList.add('is-safe');
@@ -284,32 +275,30 @@ class GameField {
             }
         }
 
-        if (_self.unCheckedCells === _self.bombNumber) {
-            _self.finishGame(true);
+        if (this.game.unCheckedCells === this.game.bombNumber) {
+            this.finishGame(true);
         }
     }
 
-    addFlag(currentCell, currentElement) {
-        const _self = this;
-        const _currentCell = _self.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`];
+    static addFlag(currentCell, currentElement) {
+        const currentCellParams = this.game.fieldCells[`x: ${currentCell.x}, y: ${currentCell.y}`];
 
-        if (!_currentCell.isChecked) {
-            if (!_currentCell.isFlag) {
-                _currentCell.isFlag = true;
+        if (!currentCellParams.isChecked) {
+            if (!currentCellParams.isFlag) {
+                currentCellParams.isFlag = true;
                 currentElement.classList.add('is-flag');
             } else {
-                _currentCell.isFlag = false;
+                currentCellParams.isFlag = false;
                 currentElement.classList.remove('is-flag');
             }
         }
     }
 
-    finishGame(isWin) {
-        const _self = this;
-        _self.endGame = true;
+    static finishGame(isWin) {
+        this.game.endGame = true;
 
-        for (let key in _self.fieldCells) {
-            const fieldCells = _self.fieldCells[key];
+        for (let key in this.game.fieldCells) {
+            const fieldCells = this.game.fieldCells[key];
             if (fieldCells.isBomb) {
                 document.getElementById(`${fieldCells.x}-${fieldCells.y}`).classList.remove('is-flag');
                 document.getElementById(`${fieldCells.x}-${fieldCells.y}`).classList.add('is-bomb');
