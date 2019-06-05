@@ -239,14 +239,18 @@ let MineSweeper = (function () {
             const inputBombs = document.getElementsByName('bombs')[0];
             const fieldContainer = document.getElementById('field');
 
+            let inputWidthValue = Math.round(+inputWidth.value);
+            let inputHeightValue = Math.round(+inputHeight.value);
+            let inputBombsValue = Math.round(+inputBombs.value);
+
             if (currentBtn.dataset.custom) {
-                fieldWidth = Math.round(!+inputWidth.value || +inputWidth.value <= minValue ? minValue : (+inputWidth.value > maxValue ? maxValue : +inputWidth.value));
-                fieldHeight = Math.round(!+inputHeight.value || +inputHeight.value <= minValue ? minValue : (+inputHeight.value > maxValue ? maxValue : +inputHeight.value));
+                fieldWidth = !inputWidthValue || inputWidthValue <= minValue ? minValue : (+inputWidthValue > maxValue ? maxValue : inputWidthValue);
+                fieldHeight = !inputHeightValue || inputHeightValue <= minValue ? minValue : (inputHeightValue > maxValue ? maxValue :inputHeightValue);
 
                 let minBombsValue = Math.round(fieldWidth * fieldHeight * 0.1);
                 let maxBombsValue = Math.round(fieldWidth * fieldHeight * 0.3);
 
-                bombNumber = Math.round(+inputBombs.value) || minBombsValue;
+                bombNumber = inputBombsValue || minBombsValue;
 
                 if(bombNumber > maxBombsValue) {
                     bombNumber = maxBombsValue;
