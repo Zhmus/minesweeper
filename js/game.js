@@ -241,7 +241,13 @@ let MineSweeper = (function () {
                 fieldWidth = Math.round(!+inputWidth.value || +inputWidth.value <= 8 ? 8 : (+inputWidth.value > 40 ? 40 : +inputWidth.value));
                 fieldHeight = Math.round(!+inputHeight.value || +inputHeight.value <= 8 ? 8 : (+inputHeight.value > 40 ? 40 : +inputHeight.value));
                 bombNumber = Math.round(+inputBombs.value || fieldWidth * fieldHeight * 0.1);
-                bombNumber = bombNumber < Math.round(fieldWidth * fieldHeight * 0.3) ? bombNumber : Math.round(fieldWidth * fieldHeight * 0.3)
+
+                if(bombNumber > Math.round(fieldWidth * fieldHeight * 0.3)) {
+                    bombNumber = Math.round(fieldWidth * fieldHeight * 0.3)
+                } else if (bombNumber < Math.round(fieldWidth * fieldHeight * 0.1)) {
+                    bombNumber = fieldWidth * fieldHeight * 0.1
+                }
+
             } else {
                 switch (currentBtn.dataset.level) {
                     case 'easy':
